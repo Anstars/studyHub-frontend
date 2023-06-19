@@ -1,6 +1,6 @@
 <template>
   <user-card-list :loading="loading" :user-list="userList"/>
-  <van-empty v-if="!userList || userList.length < 1" description="数据为空" />
+  <van-empty v-if="!userList || userList.length < 1" description="请稍等片刻" />
 </template>
 <script setup>
 import {useRoute} from "vue-router";
@@ -40,6 +40,7 @@ onMounted(async () => {
     userList.value = userListData;
   }
   loading.value = false;
+  console.log(userList)
 })
 
 
