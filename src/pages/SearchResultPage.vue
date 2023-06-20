@@ -2,7 +2,7 @@
   <user-card-list :loading="loading" :user-list="userList"/>
   <van-empty v-if="!userList || userList.length < 1" description="搜索结果为空" />
 </template>
-<script setup>
+<script setup lang="ts">
 import {useRoute} from "vue-router";
 import {onMounted, ref} from "vue";
 import { showSuccessToast, showFailToast } from 'vant';
@@ -26,7 +26,7 @@ onMounted(async () => {
   })
   .then(function (response) {
     console.log('/user/search/tags succeed',response);
-    showSuccessToast('请求成功');
+    // showSuccessToast('请求成功');
     return response?.data;
   })
   .catch(function (error) {

@@ -1,7 +1,8 @@
 <template>
-    <van-swipe-cell v-for="team in props.teamList" :key="team.id">
+  <div id="teamCardList">
     <van-card
-        :thumb="ikun"
+        v-for="team in props.teamList"
+        :thumb="teamImg"
         :desc="team.description"
         :title="`${team.name}`"
     >
@@ -12,31 +13,38 @@
           }}
         </van-tag>
       </template>
-      <teamplate #bottom>
+      <template #bottom>
         <div>
-          {{'最大人数：' + team.maxNum}}
+          {{ `队伍人数: ${team.hasJoinNum}/${team.maxNum}` }}
         </div>
         <div v-if="team.expireTime">
-          {{'过期时间：' + team.expireTime}}
+          {{ '过期时间: ' + team.expireTime }}
         </div>
         <div>
-          {{'创建时间：' + team.createTime}}
+          {{ '创建时间: ' + team.createTime }}
         </div>
-      </teamplate>
+      </template>
+
       <template #footer>
-        <van-button size="small" type="primary" plain @click="doJoinTeam(team.id)">加入队伍</van-button>
-        <van-button v-if="team.userId === currentUser?.id" size="mini" plain
+        <van-button size="small" type="primary" v-if="team.userId !== currentUser?.id && !team.hasJoin" plain
+                    @click="preJoinTeam(team)">加入队伍
+        </van-button>
+        <van-button v-if="team.userId === currentUser?.id" size="small" plain
                     @click="doUpdateTeam(team.id)">更新队伍
         </van-button>
-        <van-button size="mini" plain
+        <!-- 仅加入队伍可见 -->
+        <van-button v-if="team.hasJoin" size="small" plain
                     @click="doQuitTeam(team.id)">退出队伍
         </van-button>
-        <van-button v-if="team.userId === currentUser?.id" size="mini" plain
+        <van-button v-if="team.userId === currentUser?.id" size="small" type="danger" plain
                     @click="doDeleteTeam(team.id)">解散队伍
         </van-button>
       </template>
     </van-card>
-    </van-swipe-cell>
+  <van-dialog v-model:show="showPasswordDialog" title="请输入密码" show-cancel-button @confirm="doJoinTeam" @cancel="doJoinCancel">
+    <van-field v-model="password" placeholder="请输入密码"/>
+  </van-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -44,7 +52,7 @@ import { TeamType } from "../models/team";
 import {teamStatusEnum} from "../constants/team";
 import myAxios from "../plugins/myAxios";
 import {showFailToast, showSuccessToast} from "vant";
-import ikun from "../assets/ikun.png"
+import teamImg from "../assets/teamImg.png"
 import {useRouter} from "vue-router";
 import {getCurrentUser} from "../services/user";
 import {onMounted, ref} from "vue";
@@ -59,26 +67,52 @@ const props = withDefaults(defineProps<TeamCardListProps>(), {
   teamList: [] as TeamTpye[],
 });
 
+const showPasswordDialog = ref(false);
+const password = ref('');
 const currentUser = ref();
+const joinTeamId = ref(0);
 const router = useRouter();
 
 onMounted(async () => {
   currentUser.value = await getCurrentUser();
 })
+
+const preJoinTeam = (team: TeamType) => {
+  joinTeamId.value = team.id;
+  if (team.status === 0) {
+    doJoinTeam()
+  } else {
+    showPasswordDialog.value = true;
+  }
+}
+
+const doJoinCancel = () => {
+  joinTeamId.value = 0;
+  password.value = '';
+}
+
 /**
  * 加入队伍
  * @param id
  */
-const doJoinTeam = async (id: number) => {
-  const res = await myAxios.post('/team/join',{
-    teamId:id
+const doJoinTeam = async () => {
+  if (!joinTeamId.value) {
+    return;
+  }
+  const res = await myAxios.post('/team/join', {
+    teamId: joinTeamId.value,
+    password: password.value
   });
-  if (res?.code === 0){
+  if (res?.code === 0) {
     showSuccessToast('加入成功')
+    doJoinCancel();
   } else {
-    showFailToast('加入失败' + (res.description ? ',${res.description}' : ''))
+    showFailToast('加入失败' + (res.description ? `，${res.description}` : ''));
   }
 }
+
+
+
 
 /**
  * 跳转至更新队伍项
@@ -117,7 +151,7 @@ const doDeleteTeam = async (id: number) => {
     id,
   });
   if (res?.code === 0){
-    showSuccessToast('操作成功')
+    // showSuccessToast('操作成功')
   } else {
     showFailToast('操作失败' + (res.description ? ',${res.description}' : ''))
   }

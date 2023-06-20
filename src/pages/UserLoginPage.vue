@@ -2,7 +2,7 @@
   <van-form @submit="onSubmit">
     <van-cell-group inset>
       <van-field
-          v-model="userAccound"
+          v-model="userAccount"
           name="userAccount"
           label="账号"
           placeholder="请输入账号"
@@ -27,25 +27,27 @@
 </template>
 
 <script setup lang="ts">
-import {useRouter} from "vue-router";
+import {useRouter,useRoute} from "vue-router";
 import {ref} from "vue";
 import myAxios from "../plugins/myAxios";
 import {showFailToast, showSuccessToast} from "vant";
 
 const router = useRouter();
+const route = useRoute();
 
-const userAccound = ref('');
+const userAccount = ref('');
 const userPassword = ref('');
 const onSubmit = async () => {
 
   const res = await myAxios.post('/user/login',{
-    userAccount: userAccound.value,
+    userAccount: userAccount.value,
     userPassword: userPassword.value,
   })
   console.log(res,'用户登录')
   if (res.code === 0 && res.data){
     showSuccessToast('登录成功');
-    router.replace('/')
+    const redirectUrl = route.query?.redirect as string ?? '/';
+    window.location.href = redirectUrl;
   } else {
     showFailToast('登录失败');
   }

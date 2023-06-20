@@ -77,7 +77,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import myAxios from "../plugins/myAxios";
@@ -149,7 +149,7 @@ const onSubmit = async () => {
   // todo 前端参数校验
   const res = await myAxios.post("/team/update", postData);
   if (res?.code === 0 && res.data) {
-    showSuccessToast('更新成功');
+    // showSuccessToast('更新成功');
     router.push({
       path: '/team',
       replace: true,

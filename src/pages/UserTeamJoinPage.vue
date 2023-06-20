@@ -6,7 +6,7 @@
 </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import myAxios from "../plugins/myAxios";
@@ -15,9 +15,7 @@ import TeamCardList from "../components/TeamCardList.vue";
 
 const router = useRouter()
 const searchText = ref('')
-const value = ref('');
 const teamList = ref([])
-const loading = ref(true);
 
 /**
  * 搜索队伍
@@ -25,18 +23,17 @@ const loading = ref(true);
  * @param status
  * @returns {Promise<void>}
  */
-const listTeam = async (val = '',status = 0) => {
+const listTeam = async (val = '') => {
   const res = await myAxios.get('/team/list/my/join',{
     params: {
       searchText: val,
       pageNum: 1,
-      status,
     },
   });
   if (res?.code === 0){
-    teamList.valueOf = res.data;
+    teamList.value = res.data;
   } else {
-    showFailToast("加载失败，请刷新重试");
+    showFailToast("加载队伍失败，请刷新重试");
   }
 }
 

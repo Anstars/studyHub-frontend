@@ -2,12 +2,12 @@
 <div id="teamPage">
   <van-search v-model="value" placeholder="请输入搜索关键词" @search="onSearch"/>
   <van-button type="primary" @click="doJoinTeam">创建队伍</van-button>
-  <team-card-list :loading="loading" :teamList = "teamList" />
+  <team-card-list :teamList = "teamList" />
   <van-empty v-if="teamList?.length < 1" description="请稍等片刻" />
 </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
 import myAxios from "../plugins/myAxios";
@@ -16,7 +16,6 @@ import TeamCardList from "../components/TeamCardList.vue";
 
 const router = useRouter()
 const searchText = ref('')
-const value = ref('');
 
 const doJoinTeam = () => {
   router.push({
@@ -25,21 +24,18 @@ const doJoinTeam = () => {
 }
 
 const teamList = ref([])
-const loading = ref(true);
-const listTeam = async (val = '',status = 0) => {
+const listTeam = async (val = '') => {
   const res = await myAxios.get('/team/list/my/create',{
     params: {
       searchText: val,
       pageNum: 1,
-      status,
     },
   });
   if (res?.code === 0){
-    teamList.valueOf = res.data;
+    teamList.value = res.data;
   } else {
     showFailToast("加载失败，请刷新重试");
   }
-  loading.value = false;
 }
 
 const onSearch = async (val) => {

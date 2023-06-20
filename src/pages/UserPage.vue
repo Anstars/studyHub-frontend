@@ -15,18 +15,6 @@ import myAxios from "../plugins/myAxios";
 import {showFailToast, showSuccessToast} from "vant";
 import {getCurrentUser} from "../services/user";
 
-// const user = {
-//   id: 1,
-//   username: 'lizh',
-//   userAccount: 'admin',
-//   avatarUrl: 'https://p3-passport.byteimg.com/img/user-avatar/4662379aea1f9d583d9fa7dd868c4ff7~180x180.awebp',
-//   gender: '男',
-//   phone: '123456789',
-//   email: '123456789',
-//   planetCode: '1',
-//   createTime: new Date(),
-// }
-
 const user = ref();
 
 onMounted(async () => {
